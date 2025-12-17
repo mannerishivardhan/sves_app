@@ -98,11 +98,21 @@ class _DepartmentOverviewCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch real-time member count from users collection
-    final usersStream = ref.watch(
-      usersByDepartmentStreamProvider(departmentId),
+    // Fetch real-time head count (dept_heads in this department)
+    final headStream = ref.watch(
+      usersByDepartmentAndRoleStreamProvider(departmentId, 'dept_head'),
     );
-    final memberCount = usersStream.when(
+    final headCount = headStream.when(
+      data: (users) => users.length,
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+
+    // Fetch real-time employee count (employees in this department)
+    final employeeStream = ref.watch(
+      usersByDepartmentAndRoleStreamProvider(departmentId, 'employee'),
+    );
+    final employeeCount = employeeStream.when(
       data: (users) => users.length,
       loading: () => 0,
       error: (_, __) => 0,
@@ -184,7 +194,7 @@ class _DepartmentOverviewCard extends ConsumerWidget {
                   // Department Head - Clickable
                   Expanded(
                     child: InkWell(
-                      onTap: headId != null
+                      onTap: headCount > 0
                           ? () {
                               Navigator.push(
                                 context,
@@ -192,7 +202,7 @@ class _DepartmentOverviewCard extends ConsumerWidget {
                                   builder: (context) => UsersListScreen(
                                     filterByDepartment: departmentId,
                                     filterByRole: 'dept_head',
-                                    title: '$name - Department Head',
+                                    title: '$name - Department Heads',
                                   ),
                                 ),
                               );
@@ -202,9 +212,7 @@ class _DepartmentOverviewCard extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: headId != null
-                              ? AppColors.primary.withValues(alpha: 0.05)
-                              : Colors.transparent,
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
@@ -217,17 +225,13 @@ class _DepartmentOverviewCard extends ConsumerWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: headId != null
-                                    ? AppColors.primary.withValues(alpha: 0.1)
-                                    : AppColors.textSecondary.withValues(
-                                        alpha: 0.05,
-                                      ),
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.05,
+                                ),
                                 border: Border.all(
-                                  color: headId != null
-                                      ? AppColors.primary.withValues(alpha: 0.3)
-                                      : AppColors.textSecondary.withValues(
-                                          alpha: 0.3,
-                                        ),
+                                  color: AppColors.textSecondary.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   width: 1,
                                 ),
                                 borderRadius: BorderRadius.circular(8),
@@ -238,16 +242,21 @@ class _DepartmentOverviewCard extends ConsumerWidget {
                                   Icon(
                                     Icons.supervisor_account,
                                     size: 18,
-                                    color: headId != null
+                                    color: headCount > 0
                                         ? AppColors.primary
                                         : AppColors.textSecondary,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Head',
+                                    'Head($headCount)',
                                     style: AppTextStyles.textTheme.bodySmall
                                         ?.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: headCount > 0
+                                              ? AppColors.textPrimary
+                                              : AppColors.textSecondary,
+                                          fontWeight: headCount > 0
+                                              ? FontWeight.w600
+                                              : FontWeight.normal,
                                         ),
                                   ),
                                   if (headName != null) ...[
@@ -336,11 +345,15 @@ class _DepartmentOverviewCard extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Members($memberCount)',
+                                    'Employees($employeeCount)',
                                     style: AppTextStyles.textTheme.bodySmall
                                         ?.copyWith(
-                                          color: AppColors.textPrimary,
-                                          fontWeight: FontWeight.w600,
+                                          color: employeeCount > 0
+                                              ? AppColors.textPrimary
+                                              : AppColors.textSecondary,
+                                          fontWeight: employeeCount > 0
+                                              ? FontWeight.w600
+                                              : FontWeight.normal,
                                         ),
                                   ),
                                 ],
