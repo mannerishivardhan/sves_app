@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1009433484336",
+    "project_id": "sves-leave",
+    "storage_bucket": "sves-leave.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009433484336:android:c6c57f72fe5efb403b21f5",
+        "android_client_info": {
+          "package_name": "com.example.sves_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvoI1U2saOzE3zFLS3f4Zf5XVS7QGpbGI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

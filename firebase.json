@@ -1,0 +1,57 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-south1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "source": "functions",
+    "codebase": "default",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log"
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "sves-leave",
+          "appId": "1:1009433484336:android:c6c57f72fe5efb403b21f5",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "sves-leave",
+          "appId": "1:1009433484336:ios:94be97d7b32d434d3b21f5",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "sves-leave",
+          "appId": "1:1009433484336:ios:94be97d7b32d434d3b21f5",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "sves-leave",
+          "configurations": {
+            "android": "1:1009433484336:android:c6c57f72fe5efb403b21f5",
+            "ios": "1:1009433484336:ios:94be97d7b32d434d3b21f5",
+            "macos": "1:1009433484336:ios:94be97d7b32d434d3b21f5",
+            "web": "1:1009433484336:web:0b6c0dd3a0034d9b3b21f5",
+            "windows": "1:1009433484336:web:cff39f8697020ffb3b21f5"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserData().role == 'super_admin';
+    }
+    
+    function isDeptHead() {
+      return isAuthenticated() && getUserData().role == 'dept_head';
+    }
+    
+    function isEmployee() {
+      return isAuthenticated() && getUserData().role == 'employee';
+    }
+    
+    function isSameUser(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isSameDept(deptId) {
+      return getUserData().department_id == deptId;
+    }
+    
+    
+    // Users collection
+    match /users/{userId} {
+      // Allow anyone (even unauthenticated) to list users for onboarding check
+      // But only allow reading actual user data if authenticated
+      allow list: if true;  // For checking if any users exist
+      allow get: if isAuthenticated();  // For reading specific user data
+      // Only user themselves or Super Admin can create
+      allow create: if isAuthenticated() && (isSameUser(userId) || isSuperAdmin());
+      // Super Admin or user themselves can update
+      allow update: if isSuperAdmin() || isSameUser(userId);
+      // Only Super Admin can delete
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Departments
+    match /departments/{deptId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+    
+    // Leave applications
+    match /leave_applications/{leaveId} {
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() || 
+        isSameUser(resource.data.user_id) ||
+        (isDeptHead() && isSameDept(resource.data.department_id))
+      );
+      
+      allow create: if isAuthenticated() && isSameUser(request.resource.data.user_id);
+      
+      allow update: if isAuthenticated() && (
+        (isDeptHead() && isSameDept(resource.data.department_id)) ||
+        (isSuperAdmin() && getUserData(resource.data.user_id).role == 'dept_head')
+      );
+      
+      allow delete: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (isSameUser(resource.data.user_id) && resource.data.status == 'pending')
+      );
+    }
+    
+    // Leave balances - Read-only for users, write through Cloud Functions
+    match /leave_balances/{balanceId} {
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        isSameUser(resource.data.user_id) ||
+        (isDeptHead() && isSameDept(getUserData().department_id))
+      );
+      allow write: if false; // Only through Cloud Functions
+    }
+    
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && isSameUser(resource.data.user_id);
+      allow write: if false; // Only through Cloud Functions
+    }
+    
+    // System logs - Super Admin only
+    match /system_logs/{logId} {
+      allow read: if isSuperAdmin();
+      allow write: if false; // Only through Cloud Functions
+    }
+  }
+}
